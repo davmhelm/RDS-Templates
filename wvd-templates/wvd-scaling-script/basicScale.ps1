@@ -966,6 +966,7 @@ else {
 			[string]$HostpoolName,
 			[string]$SessionHostName
 		)
+		Write-Output "Waiting for session host '$SessionHostName' to be available"
 		$IsHostAvailable = $false
 		while (!$IsHostAvailable) {
 			$SessionHostStatus = Get-RdsSessionHost -TenantName $TenantName -HostPoolName $HostpoolName -Name $SessionHostName
@@ -1203,6 +1204,7 @@ else {
 					# Check if the session host is allowing new connections
 					Check-ForAllowNewConnections -TenantName $TenantName -HostPoolName $HostpoolName -SessionHostName $SessionHostName
 
+					Write-Output "Starting Azure VM: $VMName and waiting for it to complete ..."
 					Start-SessionHost -VMName $VMName
 					# Wait for the VM to Start
 					$IsVMStarted = $false
@@ -1210,6 +1212,7 @@ else {
 						$RoleInstance = Get-AzVM -Status -Name $VMName
 						if ($RoleInstance.PowerState -eq "VM running") {
 							$IsVMStarted = $true
+							Write-Output "Azure VM has been Started: $($RoleInstance.Name) ..."
 						}
 					}
 					# Check if session host is available
@@ -1356,6 +1359,7 @@ else {
 
 						if ($LimitSecondsToForceLogOffUser -ne 0 -or $SessionHost.Sessions -eq 0) {
 							#wait for the VM to stop
+							Write-Output "Waiting for VM: $VMName to stop ..."
 							$IsVMStopped = $false
 							while (!$IsVMStopped) {
 								$RoleInstance = Get-AzVM -Status -Name $VMName
@@ -1364,6 +1368,7 @@ else {
 									Write-Output "Azure VM has been stopped: $($RoleInstance.Name) ..."
 								}
 							}
+							Write-Output "Waiting for session host: $SessionHostName to be unavailable ..."
 							# Check if the session host status is NoHeartbeat or Unavailable                          
 							$IsSessionHostNoHeartbeat = $false
 							while (!$IsSessionHostNoHeartbeat) {
